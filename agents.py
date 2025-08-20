@@ -6,6 +6,11 @@ from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
 from datetime import datetime
 
+# Import custom agents
+from reflection_agent import reflection_node
+from refinement_agent import refinement_node
+from headline_agent import headline_node
+
 # Initialize clients
 tavily_client = TavilyClient()
 llm = ChatOpenAI(model="gpt-3.5-turbo-1106")
@@ -17,6 +22,11 @@ class AgentState:
         self.current_topic: str = ""
         self.articles: List[Dict] = []
         self.summaries: List[Dict] = []
+        self.current_article: Dict = {}
+        self.current_summary: str = ""
+        self.critique_result: Dict = {}
+        self.refinement_result: Dict = {}
+        self.headline: str = ""
 
 # Browsing Agent Implementation
 def browsing_agent(state: AgentState) -> Dict:
@@ -34,34 +44,42 @@ def browsing_agent(state: AgentState) -> Dict:
             'title': result.get('title'),
             'url': result.get('url'),
             'content': result.get('content'),
+            'raw_content': result.get('content'),  # Store raw content for reflection
             'published_date': result.get('published_date', datetime.now().isoformat())
         }
         articles.append(article)
     
     state.articles.extend(articles)
-    return {"articles": articles}
+    if articles:
+        state.current_article = articles[0]  # Process one article at a time
+    
+    return {"articles": articles, "current_article": state.current_article}
 
 # Writing Agent Implementation
 def writing_agent(state: AgentState) -> Dict:
-    summaries = []
+    if not state.current_article:
+        return {"error": "No article to process"}
     
-    for article in state.articles:
-        # Create prompt for summary generation
-        prompt = f"Please provide a concise, single-paragraph summary of the following article:\n\nTitle: {article['title']}\n\nContent: {article['content']}"
-        
-        # Generate summary using LLM
-        messages = [HumanMessage(content=prompt)]
-        response = llm.invoke(messages)
-        
-        summary = {
-            'article_title': article['title'],
-            'content': response.content,
-            'created_at': datetime.now().isoformat()
-        }
-        summaries.append(summary)
+    # Create prompt for summary generation
+    prompt = f"""Please provide a concise, single-paragraph summary of the following article:
+
+Title: {state.current_article['title']}
+
+Content: {state.current_article['content']}
+
+Generate a clear, accurate, and engaging summary."""
     
-    state.summaries.extend(summaries)
-    return {"summaries": summaries}
+    # Generate summary using LLM
+    messages = [HumanMessage(content=prompt)]
+    response = llm.invoke(messages)
+    
+    summary = response.content
+    state.current_summary = summary
+    
+    return {
+        "summary": summary,
+        "raw_content": state.current_article['raw_content']
+    }
 
 # Configure the workflow
 def create_workflow() -> Graph:
@@ -71,13 +89,19 @@ def create_workflow() -> Graph:
     # Add nodes
     workflow.add_node("browse", browsing_agent)
     workflow.add_node("write", writing_agent)
+    workflow.add_node("reflect", reflection_node)
+    workflow.add_node("refine", refinement_node)
+    workflow.add_node("headline", headline_node)
     
-    # Define edges
+    # Define edges - sequential flow
     workflow.add_edge("browse", "write")
+    workflow.add_edge("write", "reflect")
+    workflow.add_edge("reflect", "refine")
+    workflow.add_edge("refine", "headline")
     
     # Set entry and exit points
     workflow.set_entry_point("browse")
-    workflow.set_finish_point("write")
+    workflow.set_finish_point("headline")
     
     # Compile the graph
     return workflow.compile()
@@ -96,6 +120,9 @@ def process_topic(topic: str) -> Dict:
     
     return {
         "topic": topic,
-        "articles": result.articles,
-        "summaries": result.summaries
+        "article": result.current_article,
+        "initial_summary": result.current_summary,
+        "critique": result.critique_result,
+        "refined_summary": result.refinement_result.get('refined_summary'),
+        "headline": result.headline
     }
