@@ -22,7 +22,12 @@ def create_app():
     This is the industry-standard pattern to avoid circular imports and context errors.
     """
     app = Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+ # Allow both your local development server and your deployed frontend
+    origins = [
+    "http://localhost:5173",
+    "https://news-mann.netlify.app" # Your Netlify URL
+    ]
+    CORS(app, resources={r"/*": {"origins": origins}})
 
     # --- Configuration ---
     # Load configuration from environment variables
