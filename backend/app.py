@@ -1,67 +1,15 @@
 import os
-import sys
-from flask import Flask
-from flask_restx import Api
 from dotenv import load_dotenv
 
-from sqlalchemy import text
-from flask_migrate import Migrate
-
-# Load environment variables
+# Load environment variables from the .env file in the current directory
 load_dotenv()
 
-# Add the current directory to Python path so we can import from app
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Import the factory function from your 'app' package
+from app import create_app
 
-# We import the namespace from your new routes file
-from app.routes.article_routes import api as articles_ns
-from app.routes.news_routes import api as news_ns
-# We import the db instance from extensions
-from extensions import db
-# Import models to ensure they are registered
-from app.models.articles_model import Article
-from app.models.user_model import User
-from app.models.category_model import Category
+# Create the application instance
+app = create_app()
 
-migrate = Migrate()
-# Initialize Flask app
-app = Flask(__name__)
-@app.cli.command("test-db")
-def test_db_connection():
-    """Tests the database connection."""
-    try:
-        db.session.execute(text('SELECT 1'))
-        print("Database connection successful!")
-    except Exception as e:
-        print("Database connection failed:")
-        print(e)
-# --- Database Configuration ---
-# Get the database URI from your .env file
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SUPABASE_DB_URI")
-# Optional: Disable modification tracking to save resources
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# --- Initialize Extensions ---
-# Connect the SQLAlchemy instance to your Flask app
-db.init_app(app)
-
-# --- API Setup ---
-api = Api(app,
-          version='1.0',
-          title='News API',
-          description='A simple API to fetch news articles')
-
-# Add the articles namespace from your routes file to the API
-api.add_namespace(articles_ns)
-api.add_namespace(news_ns)
-migrate.init_app(app, db) 
-
-
-# A simple route to confirm the server is running
-@app.route("/")
-def home():
-    return "Flask backend is running! Navigate to / to see the Swagger UI."
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    # Note: debug=True is not recommended for production
     app.run(debug=True)

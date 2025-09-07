@@ -1,6 +1,6 @@
 from flask_restx import fields
-import sys
-import os
+# import sys
+# import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from extensions import db
 
