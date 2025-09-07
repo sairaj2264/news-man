@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 // --- Configuration ---
-const API_BASE_URL = 'http://127.0.0.1:5000';
+const API_BASE_URL = 'https://news-man-lqv1.onrender.com';
 const ARTICLES_PER_PAGE = 5;
 
 // --- Icon Components ---
