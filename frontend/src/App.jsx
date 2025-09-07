@@ -1,65 +1,123 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
 
 // --- Configuration ---
-const API_BASE_URL = 'http://127.0.0.1:5000'; // Your Flask backend URL
+const API_BASE_URL = 'http://127.0.0.1:5000';
 const ARTICLES_PER_PAGE = 5;
 
-// --- Helper Components ---
-
-// SVG Icon for Refresh
-const RefreshIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 4a12 12 0 0116 16" />
+// --- Enhanced Icons ---
+const RefreshIcon = ({ className = "h-4 w-4" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.4M20 20v-5h-5M4 4a12 12 0 0116 16" />
   </svg>
 );
 
-// Loading Spinner
-const Spinner = () => (
-  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
+const NewsIcon = () => (
+  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+  </svg>
 );
 
-// --- Main Components ---
+const ExternalLinkIcon = () => (
+  <svg className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+  </svg>
+);
 
-const ArticleCard = ({ article }) => {
+const PlusIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+// Enhanced Loading Spinner with pulse effect
+const Spinner = ({ size = "h-5 w-5" }) => (
+  <div className={`animate-spin rounded-full ${size} border-2 border-transparent border-t-current border-r-current`}></div>
+);
+
+// Floating particles background
+const FloatingParticles = () => (
+  <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    {[...Array(20)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute w-1 h-1 bg-blue-300 rounded-full opacity-30 animate-pulse"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 2}s`,
+          animationDuration: `${3 + Math.random() * 2}s`
+        }}
+      />
+    ))}
+  </div>
+);
+
+// Enhanced Article Card with glassmorphism and hover effects
+const ArticleCard = ({ article, index }) => {
   const formattedDate = article.published_at 
     ? new Date(article.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'Date not available';
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 transition-transform transform hover:scale-[1.02]">
-      <div className="mb-4">
-        <p className="text-sm text-gray-500">{article.source_name} • {formattedDate}</p>
-        <h2 className="text-2xl font-bold text-gray-800 mt-1">{article.headline}</h2>
+    <div 
+      className="group relative backdrop-blur-sm bg-white/80 border border-white/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:bg-white/90"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      {/* Gradient border effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+      
+      <div className="relative z-10">
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100/70 rounded-full">
+              {article.source_name}
+            </span>
+            <span className="text-sm text-gray-500">{formattedDate}</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 leading-tight group-hover:text-blue-700 transition-colors duration-300">
+            {article.headline}
+          </h2>
+        </div>
+        
+        <p className="text-gray-600 leading-relaxed mb-6 line-clamp-3">{article.summary}</p>
+        
+        <a 
+          href={article.source_url} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-all duration-300 hover:translate-x-1"
+        >
+          Read Full Article
+          <ExternalLinkIcon />
+        </a>
       </div>
-      <p className="text-gray-600 leading-relaxed mb-4">{article.summary}</p>
-      <a href={article.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-semibold">
-        Read Full Article &rarr;
-      </a>
     </div>
   );
 };
 
+// Enhanced Pagination with modern design
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="flex justify-center items-center space-x-2 mt-8">
-      {pageNumbers.map(number => (
-        <button
-          key={number}
-          onClick={() => onPageChange(number)}
-          className={`px-4 py-2 rounded-md text-sm font-medium ${
-            currentPage === number 
-            ? 'bg-blue-600 text-white' 
-            : 'bg-white text-gray-700 hover:bg-gray-100'
-          }`}
-        >
-          {number}
-        </button>
-      ))}
+    <div className="flex justify-center items-center space-x-3 mt-12">
+      <div className="flex items-center space-x-2 backdrop-blur-sm bg-white/80 rounded-2xl p-2 shadow-lg border border-white/20">
+        {pageNumbers.map(number => (
+          <button
+            key={number}
+            onClick={() => onPageChange(number)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+              currentPage === number 
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-110' 
+                : 'text-gray-700 hover:bg-blue-50 hover:scale-105'
+            }`}
+          >
+            {number}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
@@ -78,8 +136,9 @@ const App = () => {
   const fetchCategories = async () => {
     try {
       setLoading(prev => ({ ...prev, categories: true }));
-      const response = await axios.get(`${API_BASE_URL}/articles/categories`);
-      setCategories(response.data);
+      const response = await fetch(`${API_BASE_URL}/articles/categories`);
+      const data = await response.json();
+      setCategories(data);
     } catch (err) {
       console.error("Error fetching categories:", err);
       setError('Could not load categories. Please try refreshing the page.');
@@ -95,9 +154,10 @@ const App = () => {
       const url = category === 'general'
         ? `${API_BASE_URL}/articles/`
         : `${API_BASE_URL}/articles/by-category/${category}`;
-      const response = await axios.get(url);
-      setArticles(response.data);
-      setCurrentPage(1); // Reset to first page on new data
+      const response = await fetch(url);
+      const data = await response.json();
+      setArticles(data);
+      setCurrentPage(1);
     } catch (err) {
       console.error(`Error fetching articles for ${category}:`, err);
       setError(`Could not load articles for "${category}".`);
@@ -122,13 +182,12 @@ const App = () => {
     try {
       setError(null);
       setLoading(prev => ({ ...prev, refresh: categoryName }));
-      await axios.get(`${API_BASE_URL}/news/process/${categoryName}`);
-      // After a successful refresh, refetch the articles for the current view
+      await fetch(`${API_BASE_URL}/news/process/${categoryName}`);
       await fetchArticles(selectedCategory);
     } catch (err) {
       console.error(`Error refreshing category ${categoryName}:`, err);
       if (err.response && err.response.status === 429) {
-        setError(err.response.data.message); // Display the 30-min warning
+        setError(err.response.data.message);
       } else {
         setError(`Could not refresh "${categoryName}". Please try again later.`);
       }
@@ -138,17 +197,17 @@ const App = () => {
   };
 
   const handleAddCategory = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!newCategory.trim()) return;
     const categoryName = newCategory.trim().toLowerCase();
     
     try {
       setError(null);
       setLoading(prev => ({ ...prev, refresh: categoryName }));
-      await axios.get(`${API_BASE_URL}/news/process/${categoryName}`);
+      await fetch(`${API_BASE_URL}/news/process/${categoryName}`);
       setNewCategory('');
-      await fetchCategories(); // Refresh the category list to show the new one
-      handleCategorySelect(categoryName); // Automatically switch to the new category view
+      await fetchCategories();
+      handleCategorySelect(categoryName);
     } catch (err) {
       console.error(`Error adding category ${categoryName}:`, err);
       if (err.response && err.response.status === 429) {
@@ -170,74 +229,158 @@ const App = () => {
   const totalPages = Math.ceil(articles.length / ARTICLES_PER_PAGE);
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold text-gray-800">News-Man</h1>
-          <p className="text-lg text-gray-500 mt-2">Your Personal AI News Curator</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+      <FloatingParticles />
+      
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-purple-400/10 animate-pulse"></div>
+      
+      <div className="relative z-10 container mx-auto p-4 md:p-8">
+        {/* Enhanced Header */}
+        <header className="text-center mb-16 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6 shadow-2xl">
+            <NewsIcon />
+          </div>
+          <h1 className="text-6xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            News-Man
+          </h1>
+          <p className="text-xl text-gray-600 font-light">Your Personal AI News Curator</p>
+          <div className="mt-4 w-32 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full"></div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+          {/* Enhanced Sidebar */}
           <aside className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-8">
-              <h3 className="font-bold text-lg mb-4">Categories</h3>
-              <ul className="space-y-2">
+            <div className="backdrop-blur-sm bg-white/80 p-6 rounded-2xl shadow-xl border border-white/20 sticky top-8">
+              <h3 className="font-bold text-xl mb-6 text-gray-800 flex items-center">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                Categories
+              </h3>
+              
+              <ul className="space-y-3">
+                {/* General Feed Button */}
                 <li>
-                  <button onClick={() => handleCategorySelect('general')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${selectedCategory === 'general' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}>
-                    General Feed
+                  <button 
+                    onClick={() => handleCategorySelect('general')} 
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                      selectedCategory === 'general' 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105' 
+                        : 'text-gray-600 hover:bg-blue-50 hover:scale-105'
+                    }`}
+                  >
+                    🌍 General Feed
                   </button>
                 </li>
-                {categories.map(cat => (
-                  <li key={cat.id} className="flex items-center justify-between">
-                    <button onClick={() => handleCategorySelect(cat.category_name)} className={`flex-grow text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${selectedCategory === cat.category_name ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}>
-                      {cat.category_name.charAt(0).toUpperCase() + cat.category_name.slice(1)}
+                
+                {/* Category Buttons */}
+                {categories.map((cat, index) => (
+                  <li key={cat.id} className="flex items-center justify-between group">
+                    <button 
+                      onClick={() => handleCategorySelect(cat.category_name)} 
+                      className={`flex-grow text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        selectedCategory === cat.category_name 
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105' 
+                          : 'text-gray-600 hover:bg-blue-50 hover:scale-105'
+                      }`}
+                    >
+                      📰 {cat.category_name.charAt(0).toUpperCase() + cat.category_name.slice(1)}
                     </button>
-                    <button onClick={() => handleRefresh(cat.category_name)} className="p-2 rounded-full hover:bg-gray-200 text-gray-500" title={`Refresh ${cat.category_name}`}>
-                      {loading.refresh === cat.category_name ? <Spinner /> : <RefreshIcon />}
+                    <button 
+                      onClick={() => handleRefresh(cat.category_name)} 
+                      className="ml-2 p-2 rounded-full hover:bg-blue-100 text-gray-500 hover:text-blue-600 transition-all duration-300 hover:scale-110" 
+                      title={`Refresh ${cat.category_name}`}
+                    >
+                      {loading.refresh === cat.category_name ? 
+                        <Spinner size="h-4 w-4" /> : 
+                        <RefreshIcon className="h-4 w-4" />
+                      }
                     </button>
                   </li>
                 ))}
               </ul>
               
-              <form onSubmit={handleAddCategory} className="mt-6 border-t pt-4">
-                 <input
-                  type="text"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Add new category..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <button type="submit" className="w-full bg-blue-600 text-white rounded-md px-3 py-2 text-sm font-semibold mt-2 hover:bg-blue-700 transition-colors" disabled={loading.refresh}>
-                  {loading.refresh && loading.refresh === newCategory.trim().toLowerCase() ? 'Processing...' : 'Add & Fetch'}
-                </button>
-              </form>
+              {/* Enhanced Add Category Section */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      placeholder="Add new category..."
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddCategory(e);
+                        }
+                      }}
+                    />
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl px-4 py-3 text-sm font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center" 
+                    disabled={loading.refresh}
+                  >
+                    {loading.refresh && loading.refresh === newCategory.trim().toLowerCase() ? (
+                      <>
+                        <Spinner size="h-4 w-4" />
+                        <span className="ml-2">Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlusIcon />
+                        <span className="ml-2">Add & Fetch</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </aside>
 
-          {/* Main Content */}
+          {/* Enhanced Main Content */}
           <main className="lg:col-span-3">
+            {/* Enhanced Error Message */}
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                <strong className="font-bold">Error: </strong>
-                <span className="block sm:inline">{error}</span>
+              <div className="bg-gradient-to-r from-red-100 to-pink-100 border-2 border-red-200 text-red-700 px-6 py-4 rounded-2xl relative mb-6 backdrop-blur-sm shadow-lg animate-fade-in" role="alert">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+                  <strong className="font-bold">Error: </strong>
+                  <span className="ml-2">{error}</span>
+                </div>
               </div>
             )}
             
+            {/* Loading State */}
             {loading.articles ? (
-              <div className="text-center p-10">
-                <Spinner />
-                <p className="mt-2 text-gray-500">Loading Articles...</p>
+              <div className="text-center p-16 backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6">
+                  <Spinner size="h-8 w-8" />
+                </div>
+                <p className="text-lg text-gray-600">Loading Articles...</p>
+                <div className="mt-4 w-32 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full animate-pulse"></div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-8">
+                {/* Articles Grid */}
                 {paginatedArticles.length > 0 ? (
-                  paginatedArticles.map(article => <ArticleCard key={article.id} article={article} />)
+                  <div className="space-y-6">
+                    {paginatedArticles.map((article, index) => (
+                      <ArticleCard key={article.id} article={article} index={index} />
+                    ))}
+                  </div>
                 ) : (
-                  <div className="text-center bg-white p-10 rounded-lg shadow-sm border">
-                    <p className="text-gray-500">No articles found for "{selectedCategory}".</p>
+                  <div className="text-center backdrop-blur-sm bg-white/80 p-16 rounded-2xl shadow-xl border border-white/20">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+                      <NewsIcon />
+                    </div>
+                    <p className="text-xl text-gray-500 mb-2">No articles found</p>
+                    <p className="text-gray-400">for "{selectedCategory}" category</p>
                   </div>
                 )}
+                
+                {/* Enhanced Pagination */}
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
               </div>
             )}
@@ -249,4 +392,3 @@ const App = () => {
 };
 
 export default App;
-
