@@ -1,20 +1,23 @@
 import os
 from flask import Flask
 from flask_migrate import Migrate
-from sqlalchemy import text
 
-# Import extensions and namespaces
+# Import the extensions that will be linked to the app
 from .extensions import db, api
+
+# Import all your models so that Flask-Migrate can see them
+from .models import Article, User, Category
+
+# Import all your API namespaces
 from .routes.article_routes import api as articles_ns
 from .routes.news_routes import api as news_ns
 
-# Initialize Migrate outside the factory
 migrate = Migrate()
 
 def create_app():
     """
     Application Factory: Creates and configures the Flask app.
-    This is the industry-standard pattern.
+    This is the industry-standard pattern to avoid circular imports and context errors.
     """
     app = Flask(__name__)
 
@@ -25,7 +28,8 @@ def create_app():
     app.config["RESTX_MASK_SWAGGER"] = False
 
     # --- Initialize Extensions with the App ---
-    # This crucial step connects your extensions to the Flask app instance
+    # This is the crucial step that links your db and api objects to the
+    # Flask app instance, fixing the "app is not registered" error.
     db.init_app(app)
     api.init_app(app)
     migrate.init_app(app, db)
@@ -34,19 +38,5 @@ def create_app():
     # Define URL prefixes here for better organization
     api.add_namespace(articles_ns, path='/articles')
     api.add_namespace(news_ns, path='/news')
-    
-    # --- Register Custom CLI Commands ---
-    # This integrates your 'test-db' command into the factory pattern
-    @app.cli.command("test-db")
-    def test_db_connection():
-        """Tests the database connection."""
-        try:
-            # Use the app's context to ensure the connection is active
-            with app.app_context():
-                db.session.execute(text('SELECT 1'))
-            print("Database connection successful!")
-        except Exception as e:
-            print("Database connection failed:")
-            print(e)
 
     return app

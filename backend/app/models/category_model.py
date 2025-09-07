@@ -1,7 +1,7 @@
 # import sys
 # import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from extensions import db
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from ..extensions import db
 # --- NEW ---
 # Import the join table from its separate file
 from .user_category_join_table import user_categories

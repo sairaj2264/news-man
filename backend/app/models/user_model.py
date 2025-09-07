@@ -1,7 +1,7 @@
 # import sys
 # import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from extensions import db
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from ..extensions import db
 from flask_restx import fields
 import datetime
 # --- NEW ---

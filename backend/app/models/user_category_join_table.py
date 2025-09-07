@@ -1,7 +1,7 @@
 # import sys
 # import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from extensions import db
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from ..extensions import db
 
 # --- Many-to-Many Join Table for User Interests ---
 # This helper table links users to their preferred categories.

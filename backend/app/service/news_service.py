@@ -6,8 +6,10 @@ from tavily import TavilyClient
 import google.generativeai as genai
 from sqlalchemy import desc
 from ..extensions import db
-from ..models.articles_model import Article
-from ..models.category_model import Category
+# --- CORRECTED IMPORTS ---
+# This now imports from your central models/__init__.py file,
+# which fixes the circular dependency error.
+from ..models import Article, Category
 
 class NewsService:
     def __init__(self):
