@@ -2,9 +2,13 @@ import os
 import sys
 from flask import Flask
 from flask_restx import Api
+from dotenv import load_dotenv
 
 from sqlalchemy import text
 from flask_migrate import Migrate
+
+# Load environment variables
+load_dotenv()
 
 # Add the current directory to Python path so we can import from app
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

@@ -18,8 +18,11 @@ if url and key:
     try:
         from supabase import create_client, Client
         supabase: Client = create_client(url, key)
+        print("✅ Supabase client initialized successfully!")
     except Exception as e:
         print(f"Warning: Could not initialize Supabase client: {e}")
         supabase = None
 else:
     print("Warning: Supabase credentials not found. Running without Supabase integration.")
+    print(f"URL: {url}")
+    print(f"Key: {'SET' if key else 'NOT SET'}")
