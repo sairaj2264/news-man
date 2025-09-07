@@ -16,7 +16,8 @@ load_dotenv()
 from flask import Flask
 from extensions import db
 from app.models.articles_model import Article
-from app.models.user_models import User
+from app.models.user_model import User
+from app.models.category_model import Category
 from sqlalchemy import text
 
 def create_app():
