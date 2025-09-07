@@ -1,27 +1,42 @@
 from flask_restx import Namespace, Resource, fields
 from ..service.article_service import ArticleService
-from ..models.articles_model import Article # Import the model
-
-# Define the DTO here to avoid circular imports
-article_dto = {
-    'id': fields.String(readonly=True, description='The article unique identifier'),
-    'created_at': fields.DateTime(readonly=True, description='The timestamp of creation'),
-    'title': fields.String(required=True, description='The article title'),
-    'summary': fields.String(required=True, description='The article summary'),
-    'source_url': fields.String(required=True, description='The original URL of the article'),
-    'image_url': fields.String(description='URL for the article image'),
-    'published_at': fields.DateTime(description='The original publication date'),
-    'source_name': fields.String(description='The name of the news source'),
-}
 
 # Create a namespace for article-related operations
-api = Namespace('articles', description='Article related operations')
+api = Namespace('articles', description='Article retrieval operations')
+
+# --- API Model (DTO) for Frontend Display ---
+# This defines the structure of the JSON data sent to the frontend.
+article_display_dto = api.model('ArticleDisplay', {
+    'id': fields.String(readonly=True, description='The unique identifier for the article'),
+    'published_at': fields.Date(description='The date the article was published'),
+    'headline': fields.String(required=True, description='The AI-generated headline for the article'),
+    'summary': fields.String(required=True, description='The AI-generated summary of the article'),
+    'source_url': fields.String(required=True, description='The URL to the original article'),
+    'image_url': fields.String(description='A URL for a relevant image'),
+    'source_name': fields.String(description='The name of the news publication')
+})
 
 @api.route('/')
 class ArticleList(Resource):
-    """Resource for handling the list of articles."""
-    @api.doc('list_articles')
-    @api.marshal_list_with(api.model('ArticleDTO', article_dto)) # Use the DTO for marshalling
+    """
+    Resource for getting all articles for the main news feed.
+    """
+    @api.doc('get_all_articles')
+    @api.marshal_list_with(article_display_dto)
     def get(self):
-        """Fetch all articles"""
+        """Get all articles for the main feed, sorted by most recent"""
+        # Call the service layer to get the data
         return ArticleService.get_all_articles()
+
+@api.route('/by-category/<string:category_name>')
+@api.param('category_name', 'The name of the category to filter by (e.g., chess, technology)')
+class ArticlesByCategory(Resource):
+    """
+    Resource for getting articles filtered by a specific category.
+    """
+    @api.doc('get_articles_by_category')
+    @api.marshal_list_with(article_display_dto)
+    def get(self, category_name):
+        """Get articles for a specific category, sorted by most recent"""
+        # Call the service layer with the category name
+        return ArticleService.get_articles_by_category(category_name)
