@@ -22,3 +22,74 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+
+# ============================
+# Python
+# ============================
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+*.pyo
+*.pyd
+
+# ============================
+# Virtual Environments
+# ============================
+env/
+venv/
+ENV/
+.venv/
+
+# ============================
+# Flask / Instance
+# ============================
+instance/
+*.db
+*.sqlite3
+
+# ============================
+# Logs & Temp files
+# ============================
+*.log
+*.pot
+*.mo
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# ============================
+# Coverage / Testing
+# ============================
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# ============================
+# Jupyter / Notebooks
+# ============================
+.ipynb_checkpoints
+*.ipynb
+
+# ============================
+# Editors / IDEs
+# ============================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ============================
+# System files
+# ============================
+.DS_Store
+Thumbs.db
