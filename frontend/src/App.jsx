@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 // --- Configuration ---
-const API_BASE_URL = 'https://news-man-lqv1.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const ARTICLES_PER_PAGE = 5;
 
 // --- Icon Components ---
