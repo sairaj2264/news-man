@@ -7,7 +7,7 @@ const ARTICLES_PER_PAGE = 5;
 // --- Enhanced Icons ---
 const RefreshIcon = ({ className = "h-4 w-4" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.4M20 20v-5h-5M4 4a12 12 0 0116 16" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 4a12 12 0 0116 16" />
   </svg>
 );
 
@@ -36,11 +36,11 @@ const Spinner = ({ size = "h-5 w-5" }) => (
 
 // Floating particles background
 const FloatingParticles = () => (
-  <div className="fixed inset-0 overflow-hidden pointer-events-none">
+  <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
     {[...Array(20)].map((_, i) => (
       <div
         key={i}
-        className="absolute w-1 h-1 bg-blue-300 rounded-full opacity-30 animate-pulse"
+        className="absolute w-1 h-1 bg-green-300 rounded-full opacity-30 animate-pulse"
         style={{
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
@@ -60,21 +60,21 @@ const ArticleCard = ({ article, index }) => {
 
   return (
     <div 
-      className="group relative backdrop-blur-sm bg-white/80 border border-white/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:bg-white/90"
+      className="group relative backdrop-blur-sm bg-white/60 border border-white/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:bg-white/80 animate-fade-in"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Gradient border effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-red-400/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
       
       <div className="relative z-10">
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100/70 rounded-full">
+            <span className="inline-flex items-center px-3 py-1 text-xs font-medium text-green-800 bg-green-100/70 rounded-full">
               {article.source_name}
             </span>
             <span className="text-sm text-gray-500">{formattedDate}</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-800 leading-tight group-hover:text-blue-700 transition-colors duration-300">
+          <h2 className="text-xl font-bold text-gray-800 leading-tight group-hover:text-green-700 transition-colors duration-300">
             {article.headline}
           </h2>
         </div>
@@ -85,7 +85,7 @@ const ArticleCard = ({ article, index }) => {
           href={article.source_url} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-all duration-300 hover:translate-x-1"
+          className="inline-flex items-center text-green-600 hover:text-red-600 font-semibold transition-all duration-300 group-hover:translate-x-1"
         >
           Read Full Article
           <ExternalLinkIcon />
@@ -110,8 +110,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             onClick={() => onPageChange(number)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
               currentPage === number 
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-110' 
-                : 'text-gray-700 hover:bg-blue-50 hover:scale-105'
+                ? 'bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg scale-110' 
+                : 'text-gray-700 hover:bg-green-50 hover:scale-105'
             }`}
           >
             {number}
@@ -122,8 +122,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
+
 const App = () => {
-  // State management
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('general');
@@ -132,12 +132,21 @@ const App = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // --- Data Fetching ---
+  const apiRequest = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "An unknown error occurred." }));
+        const error = new Error(errorData.message || 'Request failed');
+        error.response = { status: response.status, data: errorData };
+        throw error;
+    }
+    return response.json();
+  };
+
   const fetchCategories = async () => {
     try {
       setLoading(prev => ({ ...prev, categories: true }));
-      const response = await fetch(`${API_BASE_URL}/articles/categories`);
-      const data = await response.json();
+      const data = await apiRequest(`${API_BASE_URL}/articles/categories`);
       setCategories(data);
     } catch (err) {
       console.error("Error fetching categories:", err);
@@ -151,11 +160,8 @@ const App = () => {
     try {
       setError(null);
       setLoading(prev => ({ ...prev, articles: true }));
-      const url = category === 'general'
-        ? `${API_BASE_URL}/articles/`
-        : `${API_BASE_URL}/articles/by-category/${category}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const url = category === 'general' ? `${API_BASE_URL}/articles/` : `${API_BASE_URL}/articles/by-category/${category}`;
+      const data = await apiRequest(url);
       setArticles(data);
       setCurrentPage(1);
     } catch (err) {
@@ -172,7 +178,6 @@ const App = () => {
     fetchArticles('general');
   }, []);
 
-  // --- Event Handlers ---
   const handleCategorySelect = (categoryName) => {
     setSelectedCategory(categoryName);
     fetchArticles(categoryName);
@@ -182,7 +187,7 @@ const App = () => {
     try {
       setError(null);
       setLoading(prev => ({ ...prev, refresh: categoryName }));
-      await fetch(`${API_BASE_URL}/news/process/${categoryName}`);
+      await apiRequest(`${API_BASE_URL}/news/process-and-store/${categoryName}`);
       await fetchArticles(selectedCategory);
     } catch (err) {
       console.error(`Error refreshing category ${categoryName}:`, err);
@@ -204,13 +209,13 @@ const App = () => {
     try {
       setError(null);
       setLoading(prev => ({ ...prev, refresh: categoryName }));
-      await fetch(`${API_BASE_URL}/news/process/${categoryName}`);
+      await apiRequest(`${API_BASE_URL}/news/process-and-store/${categoryName}`);
       setNewCategory('');
       await fetchCategories();
       handleCategorySelect(categoryName);
     } catch (err) {
       console.error(`Error adding category ${categoryName}:`, err);
-      if (err.response && err.response.status === 429) {
+       if (err.response && err.response.status === 429) {
         setError(err.response.data.message);
       } else {
         setError(`Could not add "${categoryName}".`);
@@ -220,7 +225,6 @@ const App = () => {
     }
   };
   
-  // --- Memoized Pagination Logic ---
   const paginatedArticles = useMemo(() => {
     const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
     return articles.slice(startIndex, startIndex + ARTICLES_PER_PAGE);
@@ -229,119 +233,63 @@ const App = () => {
   const totalPages = Math.ceil(articles.length / ARTICLES_PER_PAGE);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-red-50 relative overflow-hidden">
       <FloatingParticles />
-      
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-purple-400/10 animate-pulse"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-red-400/10 animate-pulse"></div>
       
       <div className="relative z-10 container mx-auto p-4 md:p-8">
-        {/* Enhanced Header */}
         <header className="text-center mb-16 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6 shadow-2xl">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-600 to-red-600 text-white mb-6 shadow-2xl">
             <NewsIcon />
           </div>
-          <h1 className="text-6xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-6xl font-extrabold bg-gradient-to-r from-green-600 to-red-600 bg-clip-text text-transparent mb-4">
             News-Man
           </h1>
           <p className="text-xl text-gray-600 font-light">Your Personal AI News Curator</p>
-          <div className="mt-4 w-32 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full"></div>
+          <div className="mt-4 w-32 h-1 bg-gradient-to-r from-green-600 to-red-600 mx-auto rounded-full"></div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Enhanced Sidebar */}
           <aside className="lg:col-span-1">
-            <div className="backdrop-blur-sm bg-white/80 p-6 rounded-2xl shadow-xl border border-white/20 sticky top-8">
+            <div className="backdrop-blur-sm bg-white/60 p-6 rounded-2xl shadow-xl border border-white/20 sticky top-8">
               <h3 className="font-bold text-xl mb-6 text-gray-800 flex items-center">
-                <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                 Categories
               </h3>
               
               <ul className="space-y-3">
-                {/* General Feed Button */}
                 <li>
-                  <button 
-                    onClick={() => handleCategorySelect('general')} 
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-                      selectedCategory === 'general' 
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105' 
-                        : 'text-gray-600 hover:bg-blue-50 hover:scale-105'
-                    }`}
-                  >
+                  <button onClick={() => handleCategorySelect('general')} className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${ selectedCategory === 'general' ? 'bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg scale-105' : 'text-gray-600 hover:bg-green-50 hover:scale-105'}`}>
                     🌍 General Feed
                   </button>
                 </li>
                 
-                {/* Category Buttons */}
-                {categories.map((cat, index) => (
+                {categories.map((cat) => (
                   <li key={cat.id} className="flex items-center justify-between group">
-                    <button 
-                      onClick={() => handleCategorySelect(cat.category_name)} 
-                      className={`flex-grow text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
-                        selectedCategory === cat.category_name 
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105' 
-                          : 'text-gray-600 hover:bg-blue-50 hover:scale-105'
-                      }`}
-                    >
+                    <button onClick={() => handleCategorySelect(cat.category_name)} className={`flex-grow text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${ selectedCategory === cat.category_name ? 'bg-gradient-to-r from-green-600 to-red-600 text-white shadow-lg scale-105' : 'text-gray-600 hover:bg-green-50 hover:scale-105'}`}>
                       📰 {cat.category_name.charAt(0).toUpperCase() + cat.category_name.slice(1)}
                     </button>
-                    <button 
-                      onClick={() => handleRefresh(cat.category_name)} 
-                      className="ml-2 p-2 rounded-full hover:bg-blue-100 text-gray-500 hover:text-blue-600 transition-all duration-300 hover:scale-110" 
-                      title={`Refresh ${cat.category_name}`}
-                    >
-                      {loading.refresh === cat.category_name ? 
-                        <Spinner size="h-4 w-4" /> : 
-                        <RefreshIcon className="h-4 w-4" />
-                      }
+                    <button onClick={() => handleRefresh(cat.category_name)} className="ml-2 p-2 rounded-full hover:bg-green-100 text-gray-500 hover:text-green-600 transition-all duration-300 hover:scale-110" title={`Refresh ${cat.category_name}`}>
+                      {loading.refresh === cat.category_name ? <Spinner size="h-4 w-4" /> : <RefreshIcon className="h-4 w-4" />}
                     </button>
                   </li>
                 ))}
               </ul>
               
-              {/* Enhanced Add Category Section */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="space-y-4">
+              <div className="mt-8 pt-6 border-t border-gray-200/50">
                   <div className="relative">
                     <input
-                      type="text"
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      placeholder="Add new category..."
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAddCategory(e);
-                        }
-                      }}
+                      type="text" value={newCategory} onChange={(e) => setNewCategory(e.target.value)}
+                      placeholder="Add & Fetch Category..."
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 bg-white/70 backdrop-blur-sm"
+                      onKeyPress={(e) => { if (e.key === 'Enter') { handleAddCategory(e); } }}
                     />
                   </div>
-                  <button 
-                    type="button"
-                    onClick={handleAddCategory}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl px-4 py-3 text-sm font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center" 
-                    disabled={loading.refresh}
-                  >
-                    {loading.refresh && loading.refresh === newCategory.trim().toLowerCase() ? (
-                      <>
-                        <Spinner size="h-4 w-4" />
-                        <span className="ml-2">Processing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <PlusIcon />
-                        <span className="ml-2">Add & Fetch</span>
-                      </>
-                    )}
-                  </button>
-                </div>
               </div>
             </div>
           </aside>
 
-          {/* Enhanced Main Content */}
           <main className="lg:col-span-3">
-            {/* Enhanced Error Message */}
             {error && (
               <div className="bg-gradient-to-r from-red-100 to-pink-100 border-2 border-red-200 text-red-700 px-6 py-4 rounded-2xl relative mb-6 backdrop-blur-sm shadow-lg animate-fade-in" role="alert">
                 <div className="flex items-center">
@@ -352,38 +300,22 @@ const App = () => {
               </div>
             )}
             
-            {/* Loading State */}
-            {loading.articles ? (
-              <div className="text-center p-16 backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6">
-                  <Spinner size="h-8 w-8" />
+            <div className="space-y-8">
+              {loading.articles ? (
+                Array.from({ length: 3 }).map((_, index) => <SkeletonCard key={index} />)
+              ) : paginatedArticles.length > 0 ? (
+                  paginatedArticles.map((article, index) => <ArticleCard key={article.id} article={article} index={index} />)
+              ) : (
+                <div className="text-center backdrop-blur-sm bg-white/80 p-16 rounded-2xl shadow-xl border border-white/20">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+                    <NewsIcon />
+                  </div>
+                  <p className="text-xl text-gray-500 mb-2">No articles found</p>
+                  <p className="text-gray-400">for "{selectedCategory}" category</p>
                 </div>
-                <p className="text-lg text-gray-600">Loading Articles...</p>
-                <div className="mt-4 w-32 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full animate-pulse"></div>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {/* Articles Grid */}
-                {paginatedArticles.length > 0 ? (
-                  <div className="space-y-6">
-                    {paginatedArticles.map((article, index) => (
-                      <ArticleCard key={article.id} article={article} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center backdrop-blur-sm bg-white/80 p-16 rounded-2xl shadow-xl border border-white/20">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
-                      <NewsIcon />
-                    </div>
-                    <p className="text-xl text-gray-500 mb-2">No articles found</p>
-                    <p className="text-gray-400">for "{selectedCategory}" category</p>
-                  </div>
-                )}
-                
-                {/* Enhanced Pagination */}
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-              </div>
-            )}
+              )}
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            </div>
           </main>
         </div>
       </div>
@@ -392,3 +324,4 @@ const App = () => {
 };
 
 export default App;
+
