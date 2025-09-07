@@ -4,7 +4,7 @@ from flask import Flask
 from flask_restx import Api
 
 from sqlalchemy import text
-
+from flask_migrate import Migrate
 
 # Add the current directory to Python path so we can import from app
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -13,7 +13,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.routes.article_routes import api as articles_ns
 # We import the db instance from extensions
 from extensions import db
+# Import models to ensure they are registered
+from app.models.articles_model import Article
 
+migrate = Migrate()
 # Initialize Flask app
 app = Flask(__name__)
 @app.cli.command("test-db")
@@ -43,6 +46,7 @@ api = Api(app,
 
 # Add the articles namespace from your routes file to the API
 api.add_namespace(articles_ns)
+migrate.init_app(app, db) 
 
 
 # A simple route to confirm the server is running
