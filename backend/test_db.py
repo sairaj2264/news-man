@@ -16,6 +16,7 @@ load_dotenv()
 from flask import Flask
 from extensions import db
 from app.models.articles_model import Article
+from app.models.user_models import User
 from sqlalchemy import text
 
 def create_app():
@@ -50,11 +51,25 @@ def test_database():
             count = result.scalar()
             print(f"✅ Articles table exists and has {count} records")
             
-            # Test table structure
-            print("🏗️  Testing table structure...")
+            # Test users table
+            print("📋 Testing users table...")
+            result = db.session.execute(text('SELECT COUNT(*) FROM users'))
+            count = result.scalar()
+            print(f"✅ Users table exists and has {count} records")
+            
+            # Test table structures
+            print("🏗️  Testing table structures...")
             inspector = db.inspect(db.engine)
+            
+            # Articles table
             columns = inspector.get_columns('articles')
             print(f"✅ Articles table has {len(columns)} columns:")
+            for col in columns:
+                print(f"   - {col['name']}: {col['type']}")
+            
+            # Users table
+            columns = inspector.get_columns('users')
+            print(f"✅ Users table has {len(columns)} columns:")
             for col in columns:
                 print(f"   - {col['name']}: {col['type']}")
             

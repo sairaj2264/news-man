@@ -15,6 +15,7 @@ from app.routes.article_routes import api as articles_ns
 from extensions import db
 # Import models to ensure they are registered
 from app.models.articles_model import Article
+from app.models.user_models import User
 
 migrate = Migrate()
 # Initialize Flask app

@@ -17,6 +17,7 @@ load_dotenv()
 from flask import Flask
 from extensions import db
 from app.models.articles_model import Article
+from app.models.user_models import User
 
 def create_app():
     """Create and configure the Flask application."""
