@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # We import the namespace from your new routes file
 from app.routes.article_routes import api as articles_ns
+from app.routes.news_routes import api as news_ns
 # We import the db instance from extensions
 from extensions import db
 # Import models to ensure they are registered
@@ -48,6 +49,7 @@ api = Api(app,
 
 # Add the articles namespace from your routes file to the API
 api.add_namespace(articles_ns)
+api.add_namespace(news_ns)
 migrate.init_app(app, db) 
 
 
