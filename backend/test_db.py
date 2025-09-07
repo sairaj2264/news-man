@@ -15,9 +15,10 @@ load_dotenv()
 
 from flask import Flask
 from extensions import db
-from app.models.articles_model import Article
+from app.models.articles_model import Article, article_categories
 from app.models.user_model import User
 from app.models.category_model import Category
+from app.models.user_category_join_table import user_categories
 from sqlalchemy import text
 
 def create_app():
@@ -58,6 +59,28 @@ def test_database():
             count = result.scalar()
             print(f"✅ Users table exists and has {count} records")
             
+            # Test categories table
+            print("📋 Testing categories table...")
+            result = db.session.execute(text('SELECT COUNT(*) FROM categories'))
+            count = result.scalar()
+            print(f"✅ Categories table exists and has {count} records")
+            
+            # Test join tables
+            print("📋 Testing join tables...")
+            try:
+                result = db.session.execute(text('SELECT COUNT(*) FROM article_categories'))
+                count = result.scalar()
+                print(f"✅ article_categories join table exists and has {count} records")
+            except Exception as e:
+                print(f"⚠️  article_categories table: {e}")
+            
+            try:
+                result = db.session.execute(text('SELECT COUNT(*) FROM user_categories'))
+                count = result.scalar()
+                print(f"✅ user_categories join table exists and has {count} records")
+            except Exception as e:
+                print(f"⚠️  user_categories table: {e}")
+            
             # Test table structures
             print("🏗️  Testing table structures...")
             inspector = db.inspect(db.engine)
@@ -71,6 +94,12 @@ def test_database():
             # Users table
             columns = inspector.get_columns('users')
             print(f"✅ Users table has {len(columns)} columns:")
+            for col in columns:
+                print(f"   - {col['name']}: {col['type']}")
+            
+            # Categories table
+            columns = inspector.get_columns('categories')
+            print(f"✅ Categories table has {len(columns)} columns:")
             for col in columns:
                 print(f"   - {col['name']}: {col['type']}")
             

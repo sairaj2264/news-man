@@ -1,2 +1,1 @@
-from .article import Article
-from .user import User
+# Routes module initialization

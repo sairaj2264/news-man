@@ -4,6 +4,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from extensions import db
 from flask_restx import fields
 import datetime
+# --- NEW ---
+# Import the join table from its separate file
+from .user_category_join_table import user_categories
 
 # --- SQLAlchemy Database Model for Users ---
 # This class defines the 'users' table in your database.
@@ -17,6 +20,14 @@ class User(db.Model):
     joined_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     date_of_birth = db.Column(db.Date, nullable=True)
     phone_number = db.Column(db.String(20), unique=True, nullable=True)
+
+    # --- NEW ---
+    # This relationship links users to the categories they are interested in.
+    categories = db.relationship(
+        'Category',
+        secondary=user_categories,
+        back_populates='users'
+    )
 
     def __repr__(self):
         return f'<User {self.email_id}>'
@@ -33,3 +44,4 @@ user_dto = {
     'date_of_birth': fields.Date(description='User date of birth'),
     'phone_number': fields.String(description='User phone number'),
 }
+
