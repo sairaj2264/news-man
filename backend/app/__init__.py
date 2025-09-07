@@ -2,6 +2,8 @@ import os
 from flask import Flask
 from flask_migrate import Migrate
 
+from flask_cors import CORS 
+
 # Import the extensions that will be linked to the app
 from .extensions import db, api
 
@@ -20,6 +22,7 @@ def create_app():
     This is the industry-standard pattern to avoid circular imports and context errors.
     """
     app = Flask(__name__)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
     # --- Configuration ---
     # Load configuration from environment variables
