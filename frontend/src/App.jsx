@@ -27,7 +27,7 @@ const Spinner = ({ size = "h-5 w-5" }) => (
   <div className={`animate-spin rounded-full ${size} border-2 border-transparent border-t-blue-600 border-r-blue-600`}></div>
 );
 
-// --- UI Components --
+// --- UI Components -----
 
 const SkeletonCard = () => (
     <div className="bg-white border border-gray-200 rounded-lg p-6 animate-pulse">
