@@ -136,6 +136,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
+//splitting Components for Better UI Control
+
 const App = () => {
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
