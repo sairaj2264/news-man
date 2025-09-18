@@ -24,6 +24,7 @@ export function AuthProvider({ children }) {
     );
 
     // Cleanup the listener when the component unmounts
+    //THis is the Auth Provider and some comments are added to increase the readibility
     return () => {
       authListener?.unsubscribe();
     };
