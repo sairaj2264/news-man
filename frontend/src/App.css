@@ -1,0 +1,180 @@
+from transformers import pipeline
+from typing import Dict, Tuple
+
+
+# -------------------------------
+# 1. Configurations
+# -------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MODEL_CONFIG = {
+    "SLM": "gpt2",          # Placeholder for fine-tuned mental health model
+    "GLM": "gpt2-medium"    # Placeholder for fine-tuned general health model
+}
+
+MENTAL_KEYWORDS = ["stress", "anxiety", "depression", "lonely", "sad", "fear", "suicidal"]
+PHYSICAL_KEYWORDS = ["fever", "cough", "injury", "diet", "exercise", "pain", "infection"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# -------------------------------
+# 2. Base Model Wrapper
+# -------------------------------
+
+
+
+
+
+
+
+
+
+class HealthModel:
+    def __init__(self, model_name: str, role: str, style: str):
+        self.role = role
+        self.style = style
+        self.model = pipeline("text-generation", model=model_name)
+
+    def generate(self, query: str) -> str:
+        prompt = f"You are a {self.role}. {self.style}\nUser: {query}\nAssistant:"
+        response = self.model(prompt, max_length=200, num_return_sequences=1, temperature=0.7)
+        return response[0]["generated_text"]
+
+
+
+
+
+
+
+
+
+        #Test Engine dELETED
+
+# -------------------------------
+# 3. Fusion Engine
+# -------------------------------
+
+class FusionEngine:
+    @staticmethod
+    def classify_query(query: str) -> str:
+        """Classify query into mental, physical, or mixed."""
+        q_lower = query.lower()
+        if any(k in q_lower for k in MENTAL_KEYWORDS):
+            return "mental"
+        elif any(k in q_lower for k in PHYSICAL_KEYWORDS):
+            return "physical"
+        else:
+            return "mixed"
+
+    @staticmethod
+    def fuse(query: str, slm_resp: str, glm_resp: str, query_type: str) -> str:
+        """Fuse responses based on query type."""
+        if query_type == "mental":
+            return (
+                "🧠 Mental Health Focused Response:\n"
+                + slm_resp
+                + "\n\n💡 Supplementary General Advice:\n"
+                + glm_resp
+            )
+        elif query_type == "physical":
+            return (
+                "🩺 General Health Focused Response:\n"
+                + glm_resp
+                + "\n\n🤝 Supportive Mental Health Note:\n"
+                + slm_resp
+            )
+        else:
+            return (
+                "🔀 Balanced Response:\n"
+                + slm_resp
+                + "\n\n"
+                + glm_resp
+            )
+
+
+# -------------------------------
+# 4. Healthcare Assistant
+# -------------------------------
+
+class HybridHealthAssistant:
+    def __init__(self):
+        self.slm = HealthModel(
+            MODEL_CONFIG["SLM"],
+            role="mental health assistant",
+            style="Respond with empathy, compassion, and supportive strategies."
+        )
+        self.glm = HealthModel(
+            MODEL_CONFIG["GLM"],
+            role="general healthcare assistant",
+            style="Provide factual, safe, and clear advice. Avoid diagnoses or prescriptions."
+        )
+
+    def handle_query(self, query: str) -> Dict[str, str]:
+        """Process query and return structured response."""
+        query_type = FusionEngine.classify_query(query)
+        slm_resp = self.slm.generate(query)
+        glm_resp = self.glm.generate(query)
+        final_resp = FusionEngine.fuse(query, slm_resp, glm_resp, query_type)
+
+        return {
+            "query": query,
+            "type": query_type,
+            "slm_response": slm_resp,
+            "glm_response": glm_resp,
+            "final_response": final_resp
+        }
+
+
+# -------------------------------
+# 5. Run Example Queries
+# -------------------------------
+
+if __name__ == "__main__":
+    assistant = HybridHealthAssistant()
+
+    queries = [
+        "I feel very anxious and can’t sleep at night.",
+        "I have a fever and sore throat since yesterday.",
+        "Stress is giving me frequent headaches and body pain."
+    ]
+
+    for q in queries:
+        result = assistant.handle_query(q)
+        print("\nUser Query:", result["query"])
+        print("Query Type:", result["type"].upper())
+        print("Final Response:\n", result["final_response"])
+        print("=" * 100)
