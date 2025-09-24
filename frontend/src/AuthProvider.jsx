@@ -32,6 +32,7 @@ export function AuthProvider({ children }) {
   }, []);
 //provided Context
   // The value provided to the context consumers
+  // Authentication will be Implemented
   const value = {
     session,
     user: session?.user ?? null,
