@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
       authListener?.unsubscribe();
     };
   }, []);
-
+//provided Context
   // The value provided to the context consumers
   const value = {
     session,
