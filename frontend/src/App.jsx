@@ -113,6 +113,7 @@ const ArticleCard = ({ article }) => {
   );
 };
 //this is just a test commit. another one this is another one another one
+//another Commit!!
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
