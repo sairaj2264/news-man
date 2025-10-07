@@ -2,7 +2,7 @@ News-Man: AI-Powered News Fetching and Summarization
 //Hashira Hackathon Problem statement  "-1" 
 Live Demo: Yet to Be Hosted
 
-An intelligent news aggregation platform that uses a sophisticated AI pipeline to fetch the latest articles, generate concise summaries, and deliver a clean, clutter-free reading experience.
+An intelligent news aggregation platform that uses a sophisticated AI pipeline to fetch the latest articles, generate concise summaries, and deliver a clean, clutter-free reading experience.....
 
 Project Overview
 News-Man is a full-stack web application designed to combat information overload. Instead of browsing multiple news sites, users can add topics of interest, and the application's AI-powered backend takes over. It uses the Tavily API for real-time, comprehensive web searches to find the latest news, then leverages the power of Google's Gemini model to create high-quality, fact-checked summaries. The results are stored and served via a robust Flask API to a dynamic React frontend, providing an always-up-to-date, personalized news feed.
