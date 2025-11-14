@@ -12,7 +12,7 @@ AI-Powered Summarization: Utilizes Google's Gemini 1.5 Flash model to generate c
 
 Real-Time News Fetching: Integrates with the Tavily Search API to find and scrape the latest articles from across the web.
 
-Category Management: Users can dynamically add new topics, triggering the AI pipeline to fetch and process news for that category.
+Category Management: Users can dynamically add new topics, triggering the AI pipeline to fetch and process news for that category..
 
 Intelligent Caching: A 30-minute caching mechanism prevents redundant API calls for the same topic, saving resources and costs.
 
