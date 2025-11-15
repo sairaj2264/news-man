@@ -16,8 +16,8 @@ class NewsService:
         self.tavily_client = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
         genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
         summarization_config = {"response_mime_type": "application/json"}
-        self.summarization_model = genai.GenerativeModel("gemini-1.5-flash", generation_config=summarization_config)
-        self.validation_model = genai.GenerativeModel("gemini-1.5-flash")
+        self.summarization_model = genai.GenerativeModel("gemini-2.5-flash", generation_config=summarization_config)
+        self.validation_model = genai.GenerativeModel("gemini-2.5-flash")
         self.raw_content_map = {}
 
     def process_topic(self, topic_name: str):
