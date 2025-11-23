@@ -1,6 +1,6 @@
 News-Man: AI-Powered News Fetching and Summarization
 //Hashira Hackathon Problem statement  "-1,-2" 
-Live Demo: Yet to Be Hosted
+Live Demo: Yet to Be Hosted.
 
 An intelligent news aggregation platform that uses a sophisticated AI pipeline to fetch the latest articles, generate concise summaries, and deliver a clean, clutter-free reading experience.....
 Yes It is True !!
